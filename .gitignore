@@ -37,7 +37,7 @@ dist/
 .tmp/
 
 # env config file.
-.env
+# .env
 
 ### NotepadPP ###
 # Notepad++ backups #
