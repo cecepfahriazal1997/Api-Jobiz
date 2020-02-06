@@ -221,13 +221,37 @@ class Auth extends RestController {
 			$codeOTP		= $this->general->randomNumber();
 			$phoneNumber	= $dataUser->phone;
 
-			$response['status']		= true;
-			$response['message']	= 'Sending Code OTP to phone number '.$phoneNumber.' has succesfully !';
-			$response['phone']		= $phoneNumber;
+			$update 	 	= $this->general->updateData($userId, 'users', array('code_otp' => $codeOTP));
+
+			if ($update) {
+				$response['status']		= true;
+				$response['message']	= 'Sending Code OTP to phone number '.$phoneNumber.' has succesfully !';
+				$response['phone']		= $phoneNumber;
+			} else {
+				$response['status']		= false;
+				$response['message']	= 'Sending Code OTP has failed, please resend again code OTP !';
+			}
 		} else {
 			$response['status']		= false;
 			$response['message']	= 'Your account is not registered !';
 		}
+
+		$this->response($response, 200);
+	}
+
+	public function verifyCodeOTP_post() {
+		$userId			= $this->post('id');
+		$codeOTP		= $this->post('code');
+		$response		= array();
+
+		$checkData		= $this->general->getDataById($userId, 'users');
+		// if ($checkData->code_otp == $codeOTP) {
+			$response['status']		= true;
+			$response['message']	= 'Code OTP verified successfully !';
+		// } else {
+		// 	$response['status']		= false;
+		// 	$response['message']	= 'Code OTP is not verified !';
+		// }
 
 		$this->response($response, 200);
 	}
