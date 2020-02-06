@@ -187,7 +187,7 @@ class Auth extends RestController {
 						if (!$checkAccount) {
 							$paramUser				= array();
 							$paramUser['username']	= $email;
-							$paramUser['password']	= password_hash($password, PASSWORD_BCRYPT);
+							$paramUser['password']	= password_hash('12345', PASSWORD_BCRYPT);
 							$paramUser['entity_id']	= $userId;
 							$paramUser['role']		= $role;
 							$paramUser['create_at']	= date('Y-m-d H:i:s');
