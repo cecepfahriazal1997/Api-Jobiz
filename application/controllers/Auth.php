@@ -8,6 +8,10 @@ class Auth extends RestController {
 		
 		$this->load->model('AuthModel', 'model');
 	}
+
+	public function tes_get(){
+		$this->response('mantap', 200);
+	}
 	
 	public function login_post() {
 		$role				= $this->post('role');
