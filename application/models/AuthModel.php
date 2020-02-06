@@ -11,6 +11,12 @@ class AuthModel extends CI_Model {
 		return $this->db->get($table)->row();
 	}
 
+	public function checkUserByPhone($phone, $table) {
+		$this->db->select('*', false);
+		$this->db->where('phone', $phone);
+		return $this->db->get($table)->row();
+	}
+
 	public function checkAccount($username, $role) {
 		$this->db->select('*', false);
 		$this->db->where('username', $username);

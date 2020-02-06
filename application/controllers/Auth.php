@@ -91,15 +91,26 @@ class Auth extends RestController {
 			$param					= array();
 			$param['name']			= $firstName.' '.$lastName;
 			$param['email']			= $email;
-			$param['phone']			= $phone;
+			$param['phone']			= $this->general->replacePhoneNumber($phone);
 			$param['create_at']		= date('Y-m-d H:i:s');
 	
-			// Check if user data is already exists
+			// Check if user data by email is already exists
 			$checkUser				= $this->model->checkUser($email, $role);
+			// Check if user data by phone is already exists
+			$checkUserPhone			= $this->model->checkUserByPhone($param['phone'], $role);
 			// Check if account user is already exists
 			$checkAccount			= $this->model->checkAccount($email, $role);
 
-			if ($checkUser) {
+			if ($checkAccount->id) {
+				$response['status']		= false;
+				$response['message']	= 'Your account already registered in the system as '.$checkAccount->role.' !';
+			} elseif ($checkUserPhone->id) {
+				$response['status']		= false;
+				$response['message']	= 'Your number phone already registered in the system !';
+			} elseif ($checkUser->id) {
+				$response['status']		= false;
+				$response['message']	= 'Your email already registered in the system !';
+			} else {
 				// insert into table freelancer or company
 				$userId				= $this->general->insertData($role, $param);
 				// insert into table register user
@@ -121,9 +132,6 @@ class Auth extends RestController {
 					$response['status']		= true;
 					$response['message']	= 'Register has been successfully !';
 				}
-			} else {
-				$response['status']		= false;
-				$response['message']	= 'You already registered in the system !';
 			}
 		} else {
 			$response['status']		= false;
@@ -147,17 +155,28 @@ class Auth extends RestController {
 				$param['name']			= $getDataGoogle['name'];
 				$param['email']			= $getDataGoogle['email'];
 				$param['image']			= $getDataGoogle['picture'];
-				$param['phone']			= $phone;
+				$param['phone']			= $this->general->replacePhoneNumber($phone);
 				$param['create_at']		= date('Y-m-d H:i:s');
 		
 				$email					= $getDataGoogle['email'];
 	
 				// Check if user data is already exists
 				$checkUser				= $this->model->checkUser($email, $role);
+				// Check if user data by phone is already exists
+				$checkUserPhone			= $this->model->checkUserByPhone($param['phone'], $role);
 				// Check if account user is already exists
-				$checkAccount			= $this->model->checkAccount($email['email'], $role);
-	
-				if ($checkUser) {
+				$checkAccount			= $this->model->checkAccount($email, $role);
+
+				if ($checkAccount->id) {
+					$response['status']		= false;
+					$response['message']	= 'Your account already registered in the system as '.$checkAccount->role.' !';
+				} elseif ($checkUserPhone->id) {
+					$response['status']		= false;
+					$response['message']	= 'Your number phone already registered in the system !';
+				} elseif ($checkUser->id) {
+					$response['status']		= false;
+					$response['message']	= 'Your email already registered in the system !';
+				} else {
 					// insert into table freelancer or company
 					$userId				= $this->general->insertData($role, $param);
 					// insert into table register user
@@ -179,13 +198,10 @@ class Auth extends RestController {
 						$response['status']		= true;
 						$response['message']	= 'Register with google has been successfully !';
 					}
-				} else {
-					$response['status']		= false;
-					$response['message']	= 'You already registered in the system !';
 				}
 			} else {
 				$response['status']		= false;
-				$response['message']	= 'Your session google signin is timout, please login again !';
+				$response['message']	= 'Your session google signin is expired, please login again !';
 			}
 		} else {
 			$response['status']		= false;
@@ -193,5 +209,58 @@ class Auth extends RestController {
 		}
 		
 		$this->response($response, 200);
+	}
+
+	public function sendCodeOTP_post() {
+		$userId			= $this->post('id');
+		$account		= $this->general->getDataById($userId, 'users');
+		$response		= array();
+
+		if ($account) {
+			$dataUser		= $this->general->getDataById($account->entity_id, $account->role);
+			$codeOTP		= $this->general->randomNumber();
+			$phoneNumber	= $dataUser->phone;
+
+			$response['status']		= true;
+			$response['message']	= 'Sending Code OTP to phone number '.$phoneNumber.' has succesfully !';
+			$response['phone']		= $phoneNumber;
+		} else {
+			$response['status']		= false;
+			$response['message']	= 'Your account is not registered !';
+		}
+
+		$this->response($response, 200);
+	}
+
+	public function changePassword_post() {
+		$userId			= $this->post('id');
+		$password		= $this->post('password');
+		$confirmPass	= $this->post('confirmPassword');
+
+		$response		= array();
+		$checkAccount	= $this->general->getDataById($userId, 'users');
+		if (empty($checkAccount->id)) {
+			$response['status']		= false;
+			$response['message']	= 'Your account is not registered !';
+		} elseif ($password != $confirmPass) {
+			$response['status']		= false;
+			$response['message']	= 'Your confirm password does not match !';
+		} else {
+			$update		= $this->general->updateData($userId, 'users', array('password' => password_hash($password, PASSWORD_BCRYPT)));
+			if ($update) {
+				$response['status']		= true;
+				$response['message']	= 'Change password has been successfully !';
+			} else {
+				$response['status']		= false;
+				$response['message']	= 'Change password is failed !';
+			}
+		}
+
+		$this->response($response, 200);
+	}
+
+	public function showProfile_post() {
+		$userId			= $this->post('id');
+		
 	}
 }
