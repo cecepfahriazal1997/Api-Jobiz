@@ -118,19 +118,19 @@ class Auth extends RestController {
 				$param['role']		= $role;
 				$this->general->insertData('register', $param);
 				if (!empty($userId)) {
-					if (!$checkAccount) {
-						$paramUser				= array();
-						$paramUser['username']	= $email;
-						$paramUser['password']	= password_hash($password, PASSWORD_BCRYPT);
-						$paramUser['entity_id']	= $userId;
-						$paramUser['role']		= $role;
-						$paramUser['create_at']	= date('Y-m-d H:i:s');
-	
-						// insert into table users
-						$this->general->insertData('users', $paramUser);
-					}
+					$paramUser				= array();
+					$paramUser['username']	= $email;
+					$paramUser['password']	= password_hash($password, PASSWORD_BCRYPT);
+					$paramUser['entity_id']	= $userId;
+					$paramUser['role']		= $role;
+					$paramUser['create_at']	= date('Y-m-d H:i:s');
+
+					// insert into table users
+					$this->general->insertData('users', $paramUser);
+
 					$response['status']		= true;
 					$response['message']	= 'Register has been successfully !';
+					$response['data']		= $this->general->getDataById($userId, 'users');
 				}
 			}
 		} else {
@@ -184,19 +184,19 @@ class Auth extends RestController {
 					$param['role']		= $role;
 					$this->general->insertData('register', $param);
 					if (!empty($userId)) {
-						if (!$checkAccount) {
-							$paramUser				= array();
-							$paramUser['username']	= $email;
-							$paramUser['password']	= password_hash('12345', PASSWORD_BCRYPT);
-							$paramUser['entity_id']	= $userId;
-							$paramUser['role']		= $role;
-							$paramUser['create_at']	= date('Y-m-d H:i:s');
-		
-							// insert into table users
-							$this->general->insertData('users', $paramUser);
-						}
+						$paramUser				= array();
+						$paramUser['username']	= $email;
+						$paramUser['password']	= password_hash('12345', PASSWORD_BCRYPT);
+						$paramUser['entity_id']	= $userId;
+						$paramUser['role']		= $role;
+						$paramUser['create_at']	= date('Y-m-d H:i:s');
+	
+						// insert into table users
+						$this->general->insertData('users', $paramUser);
+
 						$response['status']		= true;
 						$response['message']	= 'Register with google has been successfully !';
+						$response['data']		= $this->general->getDataById($userId, 'users');
 					}
 				}
 			} else {
